@@ -1,0 +1,8 @@
+include README
+include HISTORY
+include *requirements.txt
+graft docs
+
+global-exclude __pycache__
+global-exclude *.pyc
+global-exclude *.swp
