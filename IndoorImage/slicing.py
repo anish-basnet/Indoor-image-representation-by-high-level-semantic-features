@@ -5,11 +5,13 @@
 
  This is the module which slice the images into sub-images.
 """
-import os, re
-from ctypes import windll
-from idlelib.sidebar import LineNumbers
+import os
+import re
+from typing import Union
+from typing_extensions import LiteralString
 
 from PIL import Image
+
 
 def slicing(src: str, dest: str, isCategory: bool = False, numSubImages: int = 9, numImagePerCategory: int = 100, Random: bool = False):
     """
@@ -32,11 +34,11 @@ def slicing(src: str, dest: str, isCategory: bool = False, numSubImages: int = 9
             with Image.open(imgPath) as img:
                 img.verify()
                 return True
-        except (IOError, SyntaxError) as e:
+        except (IOError, SyntaxError):
             print(f"{imgPath} : Image is not valid or is corrupted")
             return False
 
-    def _sliceImage(imgPath: str, numSubImages: int):
+    def _sliceImage(imgPath: Union[LiteralString, str, bytes], numSubImgs: int):
         """
         This private function slice the image into parts
         :param imgPath:
@@ -44,22 +46,20 @@ def slicing(src: str, dest: str, isCategory: bool = False, numSubImages: int = 9
         """
         with Image.open(imgPath) as img:
             print(img.size)
-            sliceSize: int = 0
-            for i in range(1, numSubImages):
-                if i*i == numSubImages:
-                    sliceSize = i
+            slice_size: int = 0
+            for i in range(1, numSubImgs):
+                if i*i == numSubImgs:
+                    slice_size = i
                     break
-                assert i*i > numSubImages, f"Number of sub-images per image -> {numSubImages} should be squared number"
-            print(sliceSize)
-            #TODO : slice the image into sliceSize and write the image into dest
+                assert i * i > numSubImgs, f"Number of sub-images per image -> {numSubImgs} should be squared number"
+            print(slice_size)
+            #TODO : slice the image into slice_size and write the image into dest
 
-    srcPath = os.path.join(*re.split(r"[\\/]", src))
-    print('srcpath',srcPath)
+    src_path = os.path.join(*re.split(r"[\\/]", src))
     if isCategory:
-        assert os.path.isdir(srcPath)
+        assert os.path.isdir(src_path)
     else:
-        print('check for file')
-        assert os.path.isfile(srcPath)
-        isImage = _verifyImage(srcPath)
-        if isImage:
-            _sliceImage(srcPath, numSubImages=numSubImages)
+        assert os.path.isfile(src_path)
+        is_image = _verifyImage(src_path)
+        if is_image:
+            _sliceImage(src_path, numSubImgs=numSubImages)
