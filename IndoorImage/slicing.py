@@ -9,7 +9,7 @@ import os
 import re
 from typing import Union, LiteralString
 from PIL import Image
-
+from .utils.imgUtils import verifyImage
 
 def slicing(src: str, numSubImages: int = 9):
     """
@@ -18,19 +18,6 @@ def slicing(src: str, numSubImages: int = 9):
     :param numSubImages: Integer -> Number of slice of an image (default: 9)
     :return:
     """
-    def _verifyImage(imgPath: str) -> bool:
-        """
-        This function will verify for the image.
-        :param imgPath: String -> Path of the image
-        :return: Boolean -> True if the given path is image else False
-        """
-        try:
-            with Image.open(imgPath) as img:
-                img.load()
-                return True
-        except (IOError, SyntaxError):
-            print(f"{imgPath} : Image is not valid or is corrupted")
-            return False
 
     def _sliceImage(imgPath: Union[LiteralString, str, bytes], numSubImgs: int):
 
@@ -63,7 +50,7 @@ def slicing(src: str, numSubImages: int = 9):
 
     src_path = os.path.join(*re.split(r"[\\/]", src))
     assert os.path.isfile(src_path), f"{src_path} is the file type"
-    is_image = _verifyImage(src_path)
+    is_image = verifyImage(src_path)
     if is_image:
         slices = _sliceImage(src_path, numSubImgs=numSubImages)
         return slices
