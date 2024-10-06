@@ -11,29 +11,19 @@ from IndoorImage.slicing import slicing  # Assuming you have slicing logic in th
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description="This script slices the images into sub-images."
+        description="This script provides the co-ordinate of the sub-image from image."
     )
-    parser.add_argument("-isDir", action="store_true",
-                        help="Set True if it's a directory containing images in categories (Default: False)")
     parser.add_argument("--sN", required=False, default=9, type=int,
                         help="Number of sub-images per image.")
     parser.add_argument("--src", required=True, type=str,
-                        help="Source directory path (for class images) or image path (for a single image).")
-    parser.add_argument("--dest", required=True, type=str,
-                        help="Destination for the sub-images.")
-    parser.add_argument("--num", default=100, type=int,
-                        help="Number of images per category (Default 100).")
-    parser.add_argument("--random", required=False, default=False, type=bool,
-                            help="Randomize images per category (Default: False).")
+                        help="Source image path (for a single image).")
+
     # Parse the initial arguments
     args = parser.parse_args()
 
     # Output the parsed arguments for verification
-    print(f"isDir: {args.isDir}")
     print(f"Source: {args.src}")
-    print(f"Destination: {args.dest}")
     print(f"Sub-images per image: {args.sN}")
-    print(f"Number of images per category: {args.num}")
-    print(f"Random: {args.random}")
 
-    slicing(src=args.src, dest=args.dest, isCategory=False, numSubImages=args.sN)
+    cord = slicing(src=args.src, numSubImages=args.sN)
+    print(cord)

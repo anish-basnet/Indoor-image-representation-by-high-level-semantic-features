@@ -3,25 +3,19 @@
  -EMAIL: anishbasnetworld@gmail.com
  -DATE : 9/25/2024
 
- This is the module which slice the images into sub-images.
+ This is the module provides the slice-coordinate of the sub-images.
 """
 import os
 import re
-from typing import Union
-from typing_extensions import LiteralString
-
+from typing import Union, LiteralString
 from PIL import Image
 
 
-def slicing(src: str, dest: str, isCategory: bool = False, numSubImages: int = 9, numImagePerCategory: int = 100, Random: bool = False):
+def slicing(src: str, numSubImages: int = 9):
     """
-    This function slice image into sub image.
+    This function gives co-ordinate of sub images.
     :param src: String -> Source of the image or directory of classes
-    :param dest: String -> Destination of the sub-images or directory of sub-images
-    :param isCategory: Boolean -> Set True if it's a directory containing images (default: False)
     :param numSubImages: Integer -> Number of slice of an image (default: 9)
-    :param numImagePerCategory: Integer -> Number of Image Per category (default: 100)
-    :param Random: Boolean -> Randomly select images per category or not? (default: False)
     :return:
     """
     def _verifyImage(imgPath: str) -> bool:
@@ -32,34 +26,46 @@ def slicing(src: str, dest: str, isCategory: bool = False, numSubImages: int = 9
         """
         try:
             with Image.open(imgPath) as img:
-                img.verify()
+                img.load()
                 return True
         except (IOError, SyntaxError):
             print(f"{imgPath} : Image is not valid or is corrupted")
             return False
 
     def _sliceImage(imgPath: Union[LiteralString, str, bytes], numSubImgs: int):
+
         """
-        This private function slice the image into parts
+        This private function provides the co-ordinate of sub-images
         :param imgPath:
-        :return:
+        :return: [x1, x2, y1, y2] --> co-ordinate of image as (x1, x2): top-left corner, (y1, y2): bottom-right corner
         """
         with Image.open(imgPath) as img:
-            print(img.size)
             slice_size: int = 0
             for i in range(1, numSubImgs):
                 if i*i == numSubImgs:
                     slice_size = i
                     break
-                assert i * i > numSubImgs, f"Number of sub-images per image -> {numSubImgs} should be squared number"
-            print(slice_size)
-            #TODO : slice the image into slice_size and write the image into dest
+                assert i * i <= numSubImgs, f"Number of sub-images per image -> {numSubImgs} should be squared number"
+            X, Y = img.size[0]//slice_size, img.size[1]//slice_size
+            slices = []
+            _X, _Y = 0, 0
+            for i in range(slice_size):
+                for j in range(slice_size):
+                    if i==j==0:
+                        slices.append((0, 0, _X + X, _Y + Y))
+                        _X += X
+                    else:
+                        slices.append((_X, _Y, _X+X, _Y+Y))
+                        _X += X
+                _X = 0
+                _Y += Y
+            return slices
 
     src_path = os.path.join(*re.split(r"[\\/]", src))
-    if isCategory:
-        assert os.path.isdir(src_path)
+    assert os.path.isfile(src_path), f"{src_path} is the file type"
+    is_image = _verifyImage(src_path)
+    if is_image:
+        slices = _sliceImage(src_path, numSubImgs=numSubImages)
+        return slices
     else:
-        assert os.path.isfile(src_path)
-        is_image = _verifyImage(src_path)
-        if is_image:
-            _sliceImage(src_path, numSubImgs=numSubImages)
+        return None
