@@ -12,7 +12,7 @@ with open('HISTORY.md', encoding="utf-8") as f:
     history = f.read()
 
 version = {}
-with open(os.path.join(_root, 'indoor-image', 'version.py')) as f:
+with open(os.path.join(_root, 'IndoorImage', 'version.py')) as f:
     exec(f.read(), version)
 
 requirements = []
