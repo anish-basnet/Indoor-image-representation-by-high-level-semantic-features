@@ -6,3 +6,4 @@ numpy~=1.26.4
 keras~=3.6.0
 matplotlib~=3.9.2
 pandas~=2.2.3
+pyspark~=3.5.3

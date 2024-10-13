@@ -22,7 +22,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Output the parsed arguments for verification
-    print(f"Source: {args.src}")
+    print(f"Sour ce: {args.src}")
     print(f"Sub-images per image: {args.n}")
 
     label_with_score = InceptionModelPredict(image_path=args.src, NumPrediction=args.n)
