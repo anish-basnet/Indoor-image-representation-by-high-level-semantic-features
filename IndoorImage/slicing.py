@@ -5,13 +5,14 @@
 
  This is the module provides the slice-coordinate of the sub-images.
 """
-import io
 import os
 import re
 from typing import Union, LiteralString, List, Tuple, Optional
+
 from PIL import Image
-import numpy as np
+
 from .utils.imgUtils import verifyImage
+
 
 def slicing(src: str, numSubImages: int = 9):
     """
