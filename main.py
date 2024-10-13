@@ -1,11 +1,14 @@
 import os
 
+from keras._tf_keras.keras.applications.inception_v3 import InceptionV3
+
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import udf
-from pyspark.sql.types import ArrayType, IntegerType, StructType, StructField
+from pyspark.sql.types import ArrayType, IntegerType, StructType, StructField, StringType
 
 from IndoorImage.slicing import slicing_with_pyspark
 from IndoorImage.utils import list_images
+from IndoorImage.model import InceptionModelViaPyspark
 
 if __name__ == '__main__':
     # Create Spark session
@@ -20,9 +23,6 @@ if __name__ == '__main__':
     # covert list of image to dataframe of image paths
     path_dir = spark.createDataFrame([(path,) for path in images_list], ["path"])
 
-    #show the dataframe of path
-    path_dir.show(truncate=False)
-
     # load images using spark form the path in the dataframe
     images_df = spark.read.format('image').load(path_dir.rdd.map(lambda row: row.path).collect())
 
@@ -31,9 +31,6 @@ if __name__ == '__main__':
         print("No images were loaded. Please check the file paths and formats.")
     else:
         print(f"Number of images loaded: {images_df.count()}")
-        images_df.show(3)
-        images_df.printSchema()
-        images_df.select('image.width', 'image.height', 'image.nChannels', 'image.mode').show(10)
 
         # Define the UDF schema
         schema = ArrayType(StructType([
@@ -51,6 +48,30 @@ if __name__ == '__main__':
 
         # Show the result
         images_with_slices_df.select('image.width', 'image.height', 'sub_image_coordinates').show(2, truncate=False)
+
+        images_with_slices_df.show()
+        images_with_slices_df.printSchema()
+
+        # Define the schema
+        schema = ArrayType(
+            StructType([
+                StructField("coordinates", ArrayType(IntegerType()), False),  # Array of integers for coordinates
+                StructField("words", ArrayType(StringType()), False)  # Array of strings for words
+            ])
+        )
+        model = InceptionV3(weights='imagenet')
+        #  registering the UDF
+        inceptionV3_prediction_udf = udf(InceptionModelViaPyspark, schema)
+        # #
+
+
+        predict_images_label_df = (images_with_slices_df.withColumn
+                                 ('predictedWords',inceptionV3_prediction_udf( images_with_slices_df.image,
+                                images_with_slices_df.sub_image_coordinates)))
+
+        predict_images_label_df.show()
+        predict_images_label_df.printSchema()
+        predict_images_label_df.select('predictedWords').show(1, truncate=False)
 
     # Stop Spark session when done
     spark.stop()
