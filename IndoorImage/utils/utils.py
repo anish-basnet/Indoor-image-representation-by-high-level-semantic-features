@@ -8,9 +8,8 @@ import os
 import re
 import chardet
 import numpy as np
-import pandas as pd
 import uuid
-
+import pandas as pd
 
 def mkdir(path):
     if not os.path.exists(path):
